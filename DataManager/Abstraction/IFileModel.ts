@@ -8,8 +8,10 @@ export type schemaType = {
 export interface IFileModel {
     name: string;
 
+    result: object;
 
-    constructor(name: string, schema: Array<schemaType>): never;
 
-    prepareConnect():Promise<boolean>;
+    prepareConnect(): Promise<boolean>;
+
+    insertOne(data: object): Promise<IFileModel>;
 }

@@ -3,14 +3,16 @@ import {BaseDataException} from "./Exception/BaseDataException";
 import * as fs from "fs";
 import path from "path";
 
-// @ts-ignore
+
 export class FileModel implements IFileModel {
-    public recordSize: number = 0; //as byte
+    public recordSize: number = 0; // as byte
 
-    public headerSize: number = 0;
+    public headerSize: number = 0; // size of header
 
+    public result: object = {}; // result of search or create
 
     public filePath: string = path.join(".", "Data", this.name + ".mdb");
+
 
     constructor(public name: string,
                 public schema: schemaType[]) {
@@ -23,7 +25,7 @@ export class FileModel implements IFileModel {
             if (schema[i].type == "number" || schema[i].type == "reference") {
                 this.recordSize += 4;
             } else if (schema[i].type == "string") {
-                this.recordSize += 100;
+                this.recordSize += 128;
             }
 
             if (schema[i].type == "reference") {
@@ -80,6 +82,9 @@ export class FileModel implements IFileModel {
                         schemaSizeBuffer.writeUint32BE(schemaSize); // write size in buffer
 
                         header = Buffer.concat([header, schemaSizeBuffer]); // concat schema size to buffer
+
+                        let idCurrent = Buffer.alloc(4, 0x00); // buffer for store current id index
+                        header = Buffer.concat([header, idCurrent]);
 
                         let references: Array<string> = [];
 
@@ -139,6 +144,134 @@ export class FileModel implements IFileModel {
                     reject(e);
                 }
             });
+        });
+    }
+
+    public insertOne(data: object): Promise<IFileModel> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let buffer = Buffer.alloc(0); // record buffer
+
+                (data as any).id = await this.incrementId();
+
+
+                for (let i = 0; i < this.schema.length; i++) { // iterate over all schema
+                    let schemaBuffer: Buffer;
+
+                    if (this.schema[i].type == "number" || this.schema[i].type == "reference") { // create buffer schema for int types
+
+                        schemaBuffer = Buffer.alloc(4);
+
+                        if (!data.hasOwnProperty(this.schema[i].name)) { // insert default if data not provide.
+                            schemaBuffer.writeInt32BE(this.schema[i].default as number);
+                        } else {
+                            if (typeof (data as any)[this.schema[i].name] != "number" || !Number.isInteger((data as any)[this.schema[i].name])) {
+                                throw new BaseDataException("Col " + this.schema[i].name + " need int.");
+                            } else {
+                                schemaBuffer.writeInt32BE((data as any)[this.schema[i].name]);
+                            }
+                        }
+
+                    } else { // create buffer for string type.
+
+                        schemaBuffer = Buffer.alloc(128);
+
+                        if (!data.hasOwnProperty(this.schema[i].name)) { // insert default if data not provide
+                            schemaBuffer.write(this.schema[i].default as string, "ascii");
+                        }
+                        if (typeof (data as any)[this.schema[i].name] != "string") {
+                            throw new BaseDataException("Col " + this.schema[i].name + " need string.");
+                        } else {
+                            if (((data as any)[this.schema[i].name] as string).split("").some(val => val.charCodeAt(0) > 127)) {
+                                throw new BaseDataException("Col " + (data as any)[this.schema[i].name] + " must ascii.");
+                            }
+                            if ((data as any)[this.schema[i].name].length > 128) {
+                                throw new BaseDataException("Col " + (data as any)[this.schema[i].name] + " must 128byte.");
+                            }
+                            schemaBuffer.write((data as any)[this.schema[i].name], "ascii");
+                        }
+
+
+                    }
+                    buffer = Buffer.concat([buffer, schemaBuffer]);
+                }
+
+                if (buffer.length != this.recordSize) {
+                    throw new BaseDataException("conflict buffer size.");
+                }
+
+                fs.appendFile(this.filePath, buffer, (err) => {
+                    if (err) {
+                        this.decrementId().then(() => {
+                            reject(err);
+                        });
+                    } else {
+                        this.result = JSON.parse(JSON.stringify(data));
+                        resolve(this);
+                    }
+                });
+            } catch (e) {
+                await this.decrementId();
+                return reject(e);
+            }
+
+        });
+    }
+
+
+    /**
+     * get current id (From 12 bytes of file to 4 bytes long)
+     * @private
+     */
+    private getCurrentId(): Promise<number> {
+        return new Promise((resolve, reject) => {
+            fs.open(this.filePath, "r", (err, fd) => { // open file of model
+                if (err) reject(err)
+
+                // read file and save bytes in 4byte buffer and resolve readUInt32BE that buffer
+                fs.read(fd, Buffer.alloc(4), 0, 4, 12, (err, bytesRead, buffer) => {
+                    if (err) reject(err);
+                    return resolve(buffer.readUInt32BE());
+
+                });
+            });
+        });
+    }
+
+    private incrementId(): Promise<number> {
+        return new Promise<number>((resolve, reject) => {
+            this.getCurrentId().then((id) => {
+                id = id + 1;
+
+                let buffer = Buffer.alloc(4);
+                buffer.writeUInt32BE(id);
+
+                fs.open(this.filePath, 'r+', (err, fd) => {
+                    fs.write(fd, buffer, 0, 4, 12, (err, written) => {
+                        if (err) return reject(err);
+                        return resolve(id)
+                    });
+                });
+            }).catch(e => reject(e))
+        });
+    }
+
+    private decrementId(): Promise<number> {
+        return new Promise<number>((resolve, reject) => {
+            this.getCurrentId().then((id) => {
+                id = id - 1;
+
+                let buffer = Buffer.alloc(4);
+                console.log(id)
+                buffer.writeUInt32BE(id);
+
+                fs.open(this.filePath, 'r+', (err, fd) => {
+                    fs.write(fd, buffer, 0, 4, 12, (err, written) => {
+                        if (err) return reject(err);
+                        return resolve(id)
+                    });
+                });
+            }).catch(e => reject(e))
         });
     }
 }

@@ -1,4 +1,5 @@
 import {FileModel} from "./DataManager/FileModel";
+import * as fs from "fs";
 
 
 console.log("ok")
@@ -11,14 +12,27 @@ b[1] = 0xFF;
 console.log(b)
 console.log(b.readUint16BE())*/
 
-let f = new FileModel("test", [
+let f = new FileModel("salam", [
     {
         name: "name",
         type: "string"
+    },
+    {
+        name:"age",
+        type:"number"
     }
 ]);
+
+
 
 f.prepareConnect().then(r=> {
     console.log(r)
     console.log(f.headerSize)
+    f.insertOne({
+        name:"ali",
+        age:33
+    } as any);
+    console.log(f.recordSize)
 });
+
+
