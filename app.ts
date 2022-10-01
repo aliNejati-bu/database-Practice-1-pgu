@@ -11,10 +11,14 @@ b[1] = 0xFF;
 console.log(b)
 console.log(b.readUint16BE())*/
 
-
 let f = new FileModel("test", [
     {
         name: "name",
         type: "string"
     }
 ]);
+
+f.prepareConnect().then(r=> {
+    console.log(r)
+    console.log(f.headerSize)
+});

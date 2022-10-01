@@ -10,4 +10,6 @@ export interface IFileModel {
 
 
     constructor(name: string, schema: Array<schemaType>): never;
+
+    prepareConnect():Promise<boolean>;
 }
