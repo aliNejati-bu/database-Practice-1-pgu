@@ -18,24 +18,25 @@ let f = new FileModel("salam", [
         type: "string"
     },
     {
-        name:"age",
-        type:"number"
+        name: "age",
+        type: "number"
     }
 ]);
 
 
-
-
-/*
-f.prepareConnect().then(r=> {
+f.prepareConnect().then(r => {
     console.log(r)
     console.log(f.headerSize)
-    f.insertOne({
+    /*f.insertOne({
         name:"ali",
         age:33
     } as any).then(r=>{
         console.log(r.result)
     });
-    console.log(f.recordSize)
+    console.log(f.recordSize)*/
+    fs.stat(f.filePath, (err, stats) => {
+        console.log(stats.size)
+    })
+    f.findById(1).then(res => console.log(res)).catch((err) => console.log(err))
+
 });
-*/

@@ -218,6 +218,8 @@ export class FileModel implements IFileModel {
         });
     }
 
+    //TODO: add validator and, add default to result,check default that not exist.
+
 
     /**
      * get current id (From 12 bytes of file to 4 bytes long)
@@ -276,10 +278,46 @@ export class FileModel implements IFileModel {
     }
 
     findById(id: number): Promise<IFileModel> {
-        return new Promise<IFileModel>((resolve, reject) => {
+        return new Promise<IFileModel>(async (resolve, reject) => {
+            let position = this.headerSize + ((id - 1) * this.recordSize)
+            fs.stat(this.filePath, (err, stats) => {
+                if (err) return reject(err);
 
+                if (stats.size < position + this.recordSize) {
+                    return reject(new BaseDataException("In model: " + this.name + " id: " + id + " no exist."));
+                }
+                fs.open(this.filePath, "r+", (err, fd) => {
+                    fs.read(fd, Buffer.alloc(this.recordSize), 0, this.recordSize, position, (err, bytesRead, buffer) => {
+                        if (err) return reject(err);
+
+                        this.result = this.prepareResult(buffer);
+                        return resolve(this);
+                    });
+                });
+
+            });
         });
     }
 
 
+    private prepareResult(buffer: Buffer) {
+        let courses = 0;
+        let result = {};
+        for (let i = 0; i < this.schema.length; i++) {
+            if (this.schema[i].type == "number") {
+                let r = buffer.readInt32BE(courses);
+                courses += 4;
+                (result as any)[this.schema[i].name] = r;
+            } else if (this.schema[i].type == "string") {
+                let r = buffer.toString('ascii', courses, courses + 128).replace(/\0/g, '');
+                courses = 128;
+
+                (result as any)[this.schema[i].name] = r;
+            }
+        }
+        return result;
+    }
 }
+
+
+//TODO: put comments.
