@@ -2,13 +2,14 @@ export type schemaType = {
     name: string,
     type: "string" | "number" | "reference",
     reference?: IFileModel,
-    default?: unknown
+    default?: unknown,
+    unique?: boolean
 };
 
 export interface IFileModel {
     name: string;
 
-    result: object;
+    result: object | Array<any>;
 
 
     prepareConnect(): Promise<boolean>;
@@ -16,4 +17,7 @@ export interface IFileModel {
     insertOne(data: object): Promise<IFileModel>;
 
     findById(id: number): Promise<IFileModel>;
+
+    all(): Promise<IFileModel>;
+
 }

@@ -34,9 +34,10 @@ f.prepareConnect().then(r => {
         console.log(r.result)
     });
     console.log(f.recordSize)*/
-    fs.stat(f.filePath, (err, stats) => {
+    /*fs.stat(f.filePath, (err, stats) => {
         console.log(stats.size)
     })
-    f.findById(1).then(res => console.log(res)).catch((err) => console.log(err))
+    f.findById(1).then(res => console.log(res)).catch((err) => console.log(err))*/
 
+    f.all().then(res=>{console.log(res)})
 });

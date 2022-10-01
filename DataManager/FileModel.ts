@@ -9,7 +9,7 @@ export class FileModel implements IFileModel {
 
     public headerSize: number = 0; // size of header
 
-    public result: object = {}; // result of search or create
+    public result: object | Array<any> = {}; // result of search or create
 
     public filePath: string = path.join(".", "Data", this.name + ".mdb");
 
@@ -278,6 +278,7 @@ export class FileModel implements IFileModel {
     }
 
     findById(id: number): Promise<IFileModel> {
+        this.result = {};
         return new Promise<IFileModel>(async (resolve, reject) => {
             let position = this.headerSize + ((id - 1) * this.recordSize)
             fs.stat(this.filePath, (err, stats) => {
@@ -317,7 +318,31 @@ export class FileModel implements IFileModel {
         }
         return result;
     }
+
+    public async all(): Promise<IFileModel> {
+        return new Promise((resolve, reject) => {
+            fs.stat(this.filePath, async (err, stats) => {
+                if (err) return reject(err);
+                this.result = [];
+
+                if (stats.size == this.headerSize) {
+                    return resolve(this);
+                }
+
+                let recordsSize = stats.size - this.headerSize;
+                let total = recordsSize / this.recordSize;
+                let result = [];
+                for (let i = 1; i <= total; i++) {
+                    result.push((await this.findById(i)).result);
+                }
+                this.result = result;
+                return resolve(this);
+            });
+        });
+    }
+
+
 }
 
-
+// TODO: add delete
 //TODO: put comments.
