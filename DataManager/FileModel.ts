@@ -274,4 +274,12 @@ export class FileModel implements IFileModel {
             }).catch(e => reject(e))
         });
     }
+
+    findById(id: number): Promise<IFileModel> {
+        return new Promise<IFileModel>((resolve, reject) => {
+
+        });
+    }
+
+
 }

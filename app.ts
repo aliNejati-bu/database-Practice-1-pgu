@@ -25,14 +25,17 @@ let f = new FileModel("salam", [
 
 
 
+
+/*
 f.prepareConnect().then(r=> {
     console.log(r)
     console.log(f.headerSize)
     f.insertOne({
         name:"ali",
         age:33
-    } as any);
+    } as any).then(r=>{
+        console.log(r.result)
+    });
     console.log(f.recordSize)
 });
-
-
+*/

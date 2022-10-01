@@ -14,4 +14,6 @@ export interface IFileModel {
     prepareConnect(): Promise<boolean>;
 
     insertOne(data: object): Promise<IFileModel>;
+
+    findById(id: number): Promise<IFileModel>;
 }
