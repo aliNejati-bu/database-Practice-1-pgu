@@ -18,6 +18,6 @@ export interface IFileModel {
 
     findById(id: number): Promise<any>;
 
-    all(): Promise<any>;
+    all(): Promise<Array<any>>;
 
 }

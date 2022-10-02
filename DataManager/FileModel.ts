@@ -168,7 +168,10 @@ export class FileModel implements IFileModel {
 
                             if (this.schema[i].unique) {
                                 let all = await this.all();
-
+                                let flag = all.some(value => value[this.schema[i].name] == (data as any)[this.schema[i].name]);
+                                if (flag) {
+                                    throw new BaseDataException("Col " + this.schema[i] + " is unique (" + (data as any)[this.schema[i].name] + ")")
+                                }
                             }
 
                             if (typeof (data as any)[this.schema[i].name] != "number" || !Number.isInteger((data as any)[this.schema[i].name])) {
@@ -296,7 +299,7 @@ export class FileModel implements IFileModel {
                     fs.read(fd, Buffer.alloc(this.recordSize), 0, this.recordSize, position, (err, bytesRead, buffer) => {
                         if (err) return reject(err);
 
-                        let result  = this.prepareResult(buffer);
+                        let result = this.prepareResult(buffer);
                         return resolve(result);
                     });
                 });
@@ -324,14 +327,14 @@ export class FileModel implements IFileModel {
         return result;
     }
 
-    public async all(): Promise<any> {
+    public async all(): Promise<Array<any>> {
         return new Promise((resolve, reject) => {
             fs.stat(this.filePath, async (err, stats) => {
                 if (err) return reject(err);
                 this.result = [];
 
                 if (stats.size == this.headerSize) {
-                    return resolve(this);
+                    return resolve([]);
                 }
 
                 let recordsSize = stats.size - this.headerSize;
