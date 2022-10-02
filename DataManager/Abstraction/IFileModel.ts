@@ -14,10 +14,10 @@ export interface IFileModel {
 
     prepareConnect(): Promise<boolean>;
 
-    insertOne(data: object): Promise<IFileModel>;
+    insertOne(data: object): Promise<any>;
 
-    findById(id: number): Promise<IFileModel>;
+    findById(id: number): Promise<any>;
 
-    all(): Promise<IFileModel>;
+    all(): Promise<any>;
 
 }

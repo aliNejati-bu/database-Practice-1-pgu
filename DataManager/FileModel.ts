@@ -147,7 +147,7 @@ export class FileModel implements IFileModel {
         });
     }
 
-    public insertOne(data: object): Promise<IFileModel> {
+    public insertOne(data: object): Promise<any> {
         return new Promise(async (resolve, reject) => {
             try {
                 let buffer = Buffer.alloc(0); // record buffer
@@ -165,13 +165,18 @@ export class FileModel implements IFileModel {
                         if (!data.hasOwnProperty(this.schema[i].name)) { // insert default if data not provide.
                             schemaBuffer.writeInt32BE(this.schema[i].default as number);
                         } else {
+
+                            if (this.schema[i].unique) {
+                                let all = await this.all();
+
+                            }
+
                             if (typeof (data as any)[this.schema[i].name] != "number" || !Number.isInteger((data as any)[this.schema[i].name])) {
                                 throw new BaseDataException("Col " + this.schema[i].name + " need int.");
                             } else {
                                 schemaBuffer.writeInt32BE((data as any)[this.schema[i].name]);
                             }
                         }
-
                     } else { // create buffer for string type.
 
                         schemaBuffer = Buffer.alloc(128);
@@ -206,8 +211,8 @@ export class FileModel implements IFileModel {
                             reject(err);
                         });
                     } else {
-                        this.result = JSON.parse(JSON.stringify(data));
-                        resolve(this);
+                        let result = JSON.parse(JSON.stringify(data));
+                        resolve(result);
                     }
                 });
             } catch (e) {
@@ -277,9 +282,9 @@ export class FileModel implements IFileModel {
         });
     }
 
-    findById(id: number): Promise<IFileModel> {
+    findById(id: number): Promise<any> {
         this.result = {};
-        return new Promise<IFileModel>(async (resolve, reject) => {
+        return new Promise<any>(async (resolve, reject) => {
             let position = this.headerSize + ((id - 1) * this.recordSize)
             fs.stat(this.filePath, (err, stats) => {
                 if (err) return reject(err);
@@ -291,8 +296,8 @@ export class FileModel implements IFileModel {
                     fs.read(fd, Buffer.alloc(this.recordSize), 0, this.recordSize, position, (err, bytesRead, buffer) => {
                         if (err) return reject(err);
 
-                        this.result = this.prepareResult(buffer);
-                        return resolve(this);
+                        let result  = this.prepareResult(buffer);
+                        return resolve(result);
                     });
                 });
 
@@ -319,7 +324,7 @@ export class FileModel implements IFileModel {
         return result;
     }
 
-    public async all(): Promise<IFileModel> {
+    public async all(): Promise<any> {
         return new Promise((resolve, reject) => {
             fs.stat(this.filePath, async (err, stats) => {
                 if (err) return reject(err);
@@ -333,10 +338,9 @@ export class FileModel implements IFileModel {
                 let total = recordsSize / this.recordSize;
                 let result = [];
                 for (let i = 1; i <= total; i++) {
-                    result.push((await this.findById(i)).result);
+                    result.push((await this.findById(i)));
                 }
-                this.result = result;
-                return resolve(this);
+                return resolve(result);
             });
         });
     }
