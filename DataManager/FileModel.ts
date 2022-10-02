@@ -382,35 +382,51 @@ export class FileModel implements IFileModel {
             let addResult = false;
             conditions.forEach(condGroup => {
                 let lastFalse = false;
-                if (addResult){
+                if (addResult) {
                     return
                 }
                 condGroup.forEach(condition => {
-                    if (!all[i].hasOwnProperty(condition.field)) {
-                        throw new BaseDataException("field " + condition.field + " is not exist in " + this.name + "model.");
+
+                    let fieldPath = condition.field.split(".");
+                    let value;
+                    if (fieldPath.length == 1) {
+                        value = all[i][fieldPath[0]];
+                        if (!all[i].hasOwnProperty(condition.field)) {
+                            throw new BaseDataException("field " + condition.field + " is not exist in " + this.name + " model.");
+                        }
+                    } else {
+                        let current = all[i];
+                        for (let j = 0; j < fieldPath.length; j++) {
+                            if (!current.hasOwnProperty(fieldPath[j])) {
+                                throw new BaseDataException("field " + condition.field + " is not exist in " + this.name + " model.");
+                            }
+                            current = current[fieldPath[j]];
+                        }
+                        value = current;
                     }
+
 
                     if (lastFalse) {
                         return;
                     }
                     switch (condition.op) {
                         case "=":
-                            addResult = condition.value == all[i][condition.field];
+                            addResult = condition.value == value;
                             break;
                         case "!=":
-                            addResult = condition.value != all[i][condition.field];
+                            addResult = condition.value != value;
                             break;
                         case "<":
-                            addResult = all[i][condition.field] < condition.value;
+                            addResult = (value as any) < condition.value;
                             break;
                         case ">":
-                            addResult = all[i][condition.field] > condition.value;
+                            addResult = (value as any) > condition.value;
                             break;
                         case "<=":
-                            addResult = all[i][condition.field] <= condition.value;
+                            addResult = (value as any) <= condition.value;
                             break;
                         case ">=":
-                            addResult = all[i][condition.field] >= condition.value;
+                            addResult = (value as any) >= condition.value;
                             break;
                     }
 
@@ -419,7 +435,7 @@ export class FileModel implements IFileModel {
                     }
                 })
             });
-            if (addResult){
+            if (addResult) {
                 result.push(all[i]);
             }
         }
@@ -431,4 +447,4 @@ export class FileModel implements IFileModel {
 
 // TODO: add delete
 //TODO: put comments.
-// TODO: fix find add
+// TODO: fix find all

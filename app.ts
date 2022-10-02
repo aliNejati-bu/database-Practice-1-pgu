@@ -80,11 +80,7 @@ async function a() {
             iat:parseInt((Date.now()/1000) as any),
         });
 */
-        console.log(await userModel.find([[{
-            field: "id",
-            op: ">=",
-            value: 2
-        }]]))
+        console.log(await serviceHistory.find([[{field: 'user.name', op: "=", value: 'user03'}]]))
     } catch (e) {
         console.log(e);
     }

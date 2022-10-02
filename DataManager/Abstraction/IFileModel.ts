@@ -28,4 +28,5 @@ export interface IFileModel {
     all(): Promise<Array<any>>;
 
     find(conditions: Array<Array<conditionType>>): Promise<any>;
+
 }
