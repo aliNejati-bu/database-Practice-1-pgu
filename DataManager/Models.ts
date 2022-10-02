@@ -39,7 +39,6 @@ export let models: Array<() => Promise<IFileModel>> = [
                 {
                     name: "price",
                     type: "number",
-                    default: 0
                 }
             ]);
         await model.prepareConnect();
@@ -55,8 +54,7 @@ export let models: Array<() => Promise<IFileModel>> = [
                 },
                 {
                     name: "password",
-                    type: "number",
-                    default: 0
+                    type: "string",
                 },
                 {
                     name: "iat",
@@ -71,11 +69,18 @@ export let models: Array<() => Promise<IFileModel>> = [
             [
                 {
                     name: "stylist",
-                    type: "reference"
+                    type: "reference",
+                    reference: "stylists"
                 },
                 {
                     name: "user",
                     type: "reference",
+                    reference: "users"
+                },
+                {
+                    name: "service",
+                    type: "reference",
+                    reference: "services"
                 },
                 {
                     name: "iat",

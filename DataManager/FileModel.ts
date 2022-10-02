@@ -2,6 +2,7 @@ import {IFileModel, schemaType} from "./Abstraction/IFileModel";
 import {BaseDataException} from "./Exception/BaseDataException";
 import * as fs from "fs";
 import path from "path";
+import {dataManager} from "./DataManager";
 
 
 export class FileModel implements IFileModel {
@@ -99,7 +100,7 @@ export class FileModel implements IFileModel {
                                 inLevelSchemaBuffer.writeUint8(1, 50);
                             } else if (this.schema[i].type == "reference") {
                                 inLevelSchemaBuffer.writeUint8(2, 50);
-                                references.push((this.schema[i].reference as IFileModel).name);
+                                references.push(this.schema[i].reference as string);
                             } else {
                                 inLevelSchemaBuffer.writeUint8(3, 50);
                             }
@@ -163,6 +164,11 @@ export class FileModel implements IFileModel {
                         schemaBuffer = Buffer.alloc(4);
 
                         if (!data.hasOwnProperty(this.schema[i].name)) { // insert default if data not provide.
+
+                            if (!this.schema[i].default) {
+                                throw new BaseDataException("Col " + this.schema[i].name + " not defulte value.")
+                            }
+
                             schemaBuffer.writeInt32BE(this.schema[i].default as number);
                         } else {
 
@@ -184,7 +190,10 @@ export class FileModel implements IFileModel {
 
                         schemaBuffer = Buffer.alloc(128);
 
-                        if (!data.hasOwnProperty(this.schema[i].name)) { // insert default if data not provide
+                        if (!data.hasOwnProperty(this.schema[i].name)) {// insert default if data not provide
+                            if (!this.schema[i].default) {
+                                throw new BaseDataException("Col " + this.schema[i].name + " not defulte value.")
+                            }
                             schemaBuffer.write(this.schema[i].default as string, "ascii");
                         }
                         if (typeof (data as any)[this.schema[i].name] != "string") {
@@ -196,6 +205,15 @@ export class FileModel implements IFileModel {
                             if ((data as any)[this.schema[i].name].length > 128) {
                                 throw new BaseDataException("Col " + (data as any)[this.schema[i].name] + " must 128byte.");
                             }
+
+                            if (this.schema[i].unique) {
+                                let all = await this.all();
+                                let flag = all.some(value => value[this.schema[i].name] == (data as any)[this.schema[i].name]);
+                                if (flag) {
+                                    throw new BaseDataException("Col " + this.schema[i].name + " is unique (" + (data as any)[this.schema[i].name] + ") model = "+this.name);
+                                }
+                            }
+
                             schemaBuffer.write((data as any)[this.schema[i].name], "ascii");
                         }
 
@@ -220,9 +238,8 @@ export class FileModel implements IFileModel {
                 });
             } catch (e) {
                 await this.decrementId();
-                return reject(e);
+                reject(e);
             }
-
         });
     }
 
@@ -272,7 +289,6 @@ export class FileModel implements IFileModel {
                 id = id - 1;
 
                 let buffer = Buffer.alloc(4);
-                console.log(id)
                 buffer.writeUInt32BE(id);
 
                 fs.open(this.filePath, 'r+', (err, fd) => {
@@ -296,10 +312,15 @@ export class FileModel implements IFileModel {
                     return reject(new BaseDataException("In model: " + this.name + " id: " + id + " no exist."));
                 }
                 fs.open(this.filePath, "r+", (err, fd) => {
-                    fs.read(fd, Buffer.alloc(this.recordSize), 0, this.recordSize, position, (err, bytesRead, buffer) => {
+                    fs.read(fd, Buffer.alloc(this.recordSize), 0, this.recordSize, position, async (err, bytesRead, buffer) => {
                         if (err) return reject(err);
 
-                        let result = this.prepareResult(buffer);
+                        let result;
+                        try {
+                            result = await this.prepareResult(buffer);
+                        } catch (e) {
+                            return reject(e);
+                        }
                         return resolve(result);
                     });
                 });
@@ -309,7 +330,7 @@ export class FileModel implements IFileModel {
     }
 
 
-    private prepareResult(buffer: Buffer) {
+    private async prepareResult(buffer: Buffer) {
         let courses = 0;
         let result = {};
         for (let i = 0; i < this.schema.length; i++) {
@@ -319,9 +340,14 @@ export class FileModel implements IFileModel {
                 (result as any)[this.schema[i].name] = r;
             } else if (this.schema[i].type == "string") {
                 let r = buffer.toString('ascii', courses, courses + 128).replace(/\0/g, '');
-                courses = 128;
+                courses += 128;
 
                 (result as any)[this.schema[i].name] = r;
+            } else {
+                let id = buffer.readInt32BE(courses);
+                courses += 4;
+                let model = await dataManager.getModelSingleton(this.schema[i].reference as unknown as string);
+                (result as any)[this.schema[i].name] = await model.findById(id);
             }
         }
         return result;

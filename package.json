@@ -5,7 +5,8 @@
   "main": "app.ts",
   "scripts": {
     "dev": "ts-node-dev --respawn app.ts",
-    "init": "tsc -init"
+    "init": "tsc -init",
+    "compile": "tsc"
   },
   "repository": {
     "type": "git",

@@ -1,7 +1,7 @@
 export type schemaType = {
     name: string,
     type: "string" | "number" | "reference",
-    reference?: IFileModel,
+    reference?: string,
     default?: unknown,
     unique?: boolean
 };
