@@ -6,6 +6,13 @@ export type schemaType = {
     unique?: boolean
 };
 
+
+export type conditionType = {
+    field: string
+    op: "=" | ">" | "<" | ">=" | "<=" | "!=",
+    value: number | string
+};
+
 export interface IFileModel {
     name: string;
 
@@ -20,4 +27,5 @@ export interface IFileModel {
 
     all(): Promise<Array<any>>;
 
+    find(conditions: Array<Array<conditionType>>): Promise<any>;
 }

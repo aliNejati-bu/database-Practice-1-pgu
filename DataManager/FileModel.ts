@@ -1,4 +1,4 @@
-import {IFileModel, schemaType} from "./Abstraction/IFileModel";
+import {conditionType, IFileModel, schemaType} from "./Abstraction/IFileModel";
 import {BaseDataException} from "./Exception/BaseDataException";
 import * as fs from "fs";
 import path from "path";
@@ -210,7 +210,7 @@ export class FileModel implements IFileModel {
                                 let all = await this.all();
                                 let flag = all.some(value => value[this.schema[i].name] == (data as any)[this.schema[i].name]);
                                 if (flag) {
-                                    throw new BaseDataException("Col " + this.schema[i].name + " is unique (" + (data as any)[this.schema[i].name] + ") model = "+this.name);
+                                    throw new BaseDataException("Col " + this.schema[i].name + " is unique (" + (data as any)[this.schema[i].name] + ") model = " + this.name);
                                 }
                             }
 
@@ -374,7 +374,61 @@ export class FileModel implements IFileModel {
         });
     }
 
+    async find(conditions: Array<Array<conditionType>>): Promise<any> {
+        let all = await this.all();
+        let result = [];
+
+        for (let i = 0; i < all.length; i++) {
+            let addResult = false;
+            conditions.forEach(condGroup => {
+                let lastFalse = false;
+                if (addResult){
+                    return
+                }
+                condGroup.forEach(condition => {
+                    if (!all[i].hasOwnProperty(condition.field)) {
+                        throw new BaseDataException("field " + condition.field + " is not exist in " + this.name + "model.");
+                    }
+
+                    if (lastFalse) {
+                        return;
+                    }
+                    switch (condition.op) {
+                        case "=":
+                            addResult = condition.value == all[i][condition.field];
+                            break;
+                        case "!=":
+                            addResult = condition.value != all[i][condition.field];
+                            break;
+                        case "<":
+                            addResult = all[i][condition.field] < condition.value;
+                            break;
+                        case ">":
+                            addResult = all[i][condition.field] > condition.value;
+                            break;
+                        case "<=":
+                            addResult = all[i][condition.field] <= condition.value;
+                            break;
+                        case ">=":
+                            addResult = all[i][condition.field] >= condition.value;
+                            break;
+                    }
+
+                    if (!addResult) {
+                        lastFalse = true;
+                    }
+                })
+            });
+            if (addResult){
+                result.push(all[i]);
+            }
+        }
+        return result;
+    }
+
+
 }
 
 // TODO: add delete
 //TODO: put comments.
+// TODO: fix find add
