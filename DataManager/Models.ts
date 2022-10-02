@@ -3,12 +3,11 @@ import {FileModel} from "./FileModel";
 
 export let models: Array<() => Promise<IFileModel>> = [
     async () => {
-        return new FileModel("stylists",
+        let model = new FileModel("stylists",
             [
                 {
                     name: "name",
                     type: "string",
-                    default: "noname",
                     unique: true
                 },
                 {
@@ -26,5 +25,68 @@ export let models: Array<() => Promise<IFileModel>> = [
                     type: "string"
                 }
             ]);
+        await model.prepareConnect();
+        return model;
+    },
+    async () => {
+        let model = new FileModel("services",
+            [
+                {
+                    name: "name",
+                    type: "string",
+                    unique: true
+                },
+                {
+                    name: "price",
+                    type: "number",
+                    default: 0
+                }
+            ]);
+        await model.prepareConnect();
+        return model;
+    },
+    async () => {
+        let model = new FileModel("users",
+            [
+                {
+                    name: "name",
+                    type: "string",
+                    unique: true
+                },
+                {
+                    name: "password",
+                    type: "number",
+                    default: 0
+                },
+                {
+                    name: "iat",
+                    type: "number"
+                }
+            ]);
+        await model.prepareConnect();
+        return model;
+    },
+    async () => {
+        let model = new FileModel("serviceHistory",
+            [
+                {
+                    name: "stylist",
+                    type: "reference"
+                },
+                {
+                    name: "user",
+                    type: "reference",
+                },
+                {
+                    name: "iat",
+                    type: "number"
+                },
+                {
+                    name: "paid",
+                    type: "number"
+                }
+            ]);
+        await model.prepareConnect();
+        return model;
     },
 ];

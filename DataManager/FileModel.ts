@@ -348,7 +348,6 @@ export class FileModel implements IFileModel {
         });
     }
 
-
 }
 
 // TODO: add delete

@@ -1,43 +1,13 @@
 import {FileModel} from "./DataManager/FileModel";
 import * as fs from "fs";
+import {models} from "./DataManager/Models";
 
 
 console.log("ok")
 
+async function a() {
+    //console.log(await (await models[0]()).all());
+}
 
-/*let b = Buffer.alloc(2);
-b[0] = 0xA5;
-b[1] = 0xFF;
+a()
 
-console.log(b)
-console.log(b.readUint16BE())*/
-
-let f = new FileModel("salam", [
-    {
-        name: "name",
-        type: "string"
-    },
-    {
-        name: "age",
-        type: "number"
-    }
-]);
-
-
-f.prepareConnect().then(r => {
-    console.log(r)
-    console.log(f.headerSize)
-    /*f.insertOne({
-        name:"ali",
-        age:33
-    } as any).then(r=>{
-        console.log(r.result)
-    });
-    console.log(f.recordSize)*/
-    /*fs.stat(f.filePath, (err, stats) => {
-        console.log(stats.size)
-    })
-    f.findById(1).then(res => console.log(res)).catch((err) => console.log(err))*/
-
-    f.all().then(res=>{console.log(res)})
-});
