@@ -27,6 +27,10 @@ export interface IFileModel {
 
     all(): Promise<Array<any>>;
 
-    find(conditions: Array<Array<conditionType>>): Promise<any>;
+    find(conditions: Array<Array<conditionType>>): Promise<Array<any>>;
+
+    updateById(data: any, id: number): Promise<any>;
+
+    findOne(conditions: Array<Array<conditionType>>): Promise<any>;
 
 }

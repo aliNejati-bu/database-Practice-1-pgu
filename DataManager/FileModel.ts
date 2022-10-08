@@ -374,7 +374,7 @@ export class FileModel implements IFileModel {
         });
     }
 
-    async find(conditions: Array<Array<conditionType>>): Promise<any> {
+    async find(conditions: Array<Array<conditionType>>, isOne: boolean = false): Promise<Array<any>> {
         let all = await this.all();
         let result = [];
 
@@ -437,9 +437,91 @@ export class FileModel implements IFileModel {
             });
             if (addResult) {
                 result.push(all[i]);
+                if (isOne) {
+                    return result;
+                }
             }
         }
         return result;
+    }
+
+
+    updateById(data: any, id: number): Promise<any> {
+
+        this.result = {};
+        return new Promise<any>(async (resolve, reject) => {
+            if (data.id) {
+                return reject(new BaseDataException("can not edit id. model: " + this.name));
+            }
+            let positionRec = this.headerSize + ((id - 1) * this.recordSize)
+            fs.stat(this.filePath, (err, stats) => {
+                if (err) return reject(err);
+
+                if (stats.size < positionRec + this.recordSize) {
+                    return reject(new BaseDataException("In model: " + this.name + " id: " + id + " no exist."));
+                }
+
+                fs.open(this.filePath, "r+", (err, fd) => {
+                    fs.read(fd, Buffer.alloc(this.recordSize), 0, this.recordSize, positionRec, async (err, bytesRead, buffer) => {
+                        if (err) return reject(err);
+
+                        let position = 0;
+                        for (let i = 0; i < this.schema.length; i++) {
+                            if (data.hasOwnProperty(this.schema[i].name)) {
+                                if (this.schema[i].type == "string") {
+                                    data[this.schema[i].name] = data[this.schema[i].name].toString();
+                                    if (this.schema[i].unique) {
+                                        let r = await this.findOne([[
+                                            {
+                                                field: this.schema[i].name,
+                                                op: "=",
+                                                value: data[this.schema[i].name]
+                                            }
+                                        ]]);
+                                        if (r) {
+                                            return reject(new BaseDataException("field " + this.schema[i].name + " is unique."));
+                                        }
+                                    }
+                                    buffer.write(data[this.schema[i].name], position, 128, "ascii");
+                                    position += 128;
+                                } else {
+                                    data[this.schema[i].name] = parseInt(data[this.schema[i].name]);
+                                    if (this.schema[i].unique) {
+                                        let r = await this.findOne([[
+                                            {
+                                                field: this.schema[i].name,
+                                                op: "=",
+                                                value: data[this.schema[i].name]
+                                            }
+                                        ]]);
+                                        if (r) {
+                                            return reject(new BaseDataException("field " + this.schema[i].name + " is unique."));
+                                        }
+                                    }
+                                    buffer.writeInt32BE(data[this.schema[i].name], position);
+                                    position += 4;
+                                }
+                            } else {
+                                if (this.schema[i].type == "string") {
+                                    position += 128;
+                                } else {
+                                    position += 4;
+                                }
+                            }
+                        }
+                        fs.write(fd, buffer, 0, this.recordSize, positionRec, async (err) => {
+                            if (err) return reject(err);
+                            resolve(await this.prepareResult(buffer));
+                        });
+                    });
+                });
+
+            });
+        });
+    }
+
+    async findOne(conditions: Array<Array<conditionType>>): Promise<any> {
+        return (await this.find(conditions, true))[0] ?? false;
     }
 
 
