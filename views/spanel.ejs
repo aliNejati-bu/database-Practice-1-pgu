@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/jquery.dataTables.css">
+
+
+    <title>welcome</title>
+</head>
+<body>
+<div class="container wellcome-container">
+    <div class="row">
+        <h2 class="col-12 text-center mb-5">
+            stylist panel:
+        </h2>
+        <div class="col-12">
+            <div class="row">
+                <div class="text-center col-6 mb-3">Name: <%= user.name %></div>
+                <div class="text-center col-6 mb-3">Age: <%= user.age %></div>
+                <div class="text-center col-6 mb-3">Class: <%= user.class %></div>
+                <div class="text-center col-6 mb-3">id: <%= user.id %></div>
+            </div>
+        </div>
+        <h2 class="col-12 text-center mb-5 mt-5">
+            your services:
+        </h2>
+        <div class="row col-12 d-flex align-content-center justify-content-center">
+            <table id="example" class="display col-12" style="width:100%">
+                <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>User</th>
+                    <th>Service</th>
+                    <th>Date</th>
+                    <th>Revenue</th>
+                </tr>
+                </thead>
+                <tbody>
+                <% history.forEach((val)=>{
+                %>
+                    <tr>
+                        <td><%= val.id %></td>
+                        <td><%= val.user.name %></td>
+                        <td><%= val.service.name %></td>
+                        <td><%= new Date(val.iat * 1000).toDateString() %></td>
+                        <td><%= val.service.price %>$</td>
+                    </tr>
+                <%
+                }) %>
+                </tbody>
+                <tfoot>
+                <tr>
+                    <th>Id</th>
+                    <th>User</th>
+                    <th>Service</th>
+                    <th>Date</th>
+                    <th>Revenue</th>
+                </tr>
+                </tfoot>
+            </table>
+            <button type="button" class="btn btn-primary btn-block mt-4" data-toggle="modal"
+                    data-target="#exampleModal">
+                add to history
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="/jquery.min.js"></script>
+<script src="/toastr.min.js"></script>
+<script type="text/javascript" charset="utf8" src="/jquery.dataTables.js"></script>
+<script src="/bootstrap.min.js"></script>
+<scipt src="/bjq.min.js"></scipt>
+<script>
+    $(document).ready(function () {
+        $('#example').DataTable({
+            order: [[0, 'desc']],
+        });
+    });
+</script>
+<% if(isError){ %>
+    <script>
+        toastr["error"]("<%= error %>", "error")
+    </script>
+<%
+} %>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Create history</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form method="post" action="/stylist/create">
+                <div class="modal-body">
+
+                    <div class="form-group col-12">
+                        <label for="exampleInputEmail1">sevice</label>
+                        <select class="form-select" aria-label="Default select example" name="service">
+                            <% services.forEach(val => {
+                            %>
+                                <option value="<%= val.id %>"><%= val.name %></option>
+                            <%
+                            })
+                            %>
+                        </select>
+
+                    </div>
+                    <div class="form-group col-12">
+                        <label for="exampleInputEmail1">User name</label>
+                        <input type="text" name="username" class="form-control col-12" id="exampleInputEmail1"
+                               aria-describedby="emailHelp" placeholder="User name" required>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
