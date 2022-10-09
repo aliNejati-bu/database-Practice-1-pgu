@@ -55,6 +55,7 @@ export let models: Array<() => Promise<IFileModel>> = [
                 {
                     name: "password",
                     type: "string",
+                    default: "1234"
                 },
                 {
                     name: "iat",
