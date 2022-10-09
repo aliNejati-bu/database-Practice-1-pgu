@@ -94,4 +94,21 @@ export let models: Array<() => Promise<IFileModel>> = [
         await model.prepareConnect();
         return model;
     },
+    async () => {
+        let model = new FileModel("admins",
+            [
+                {
+                    name: "email",
+                    type: "string",
+                    unique: true
+                },
+                {
+                    name: "password",
+                    type: "string"
+                }
+            ]);
+        await model.prepareConnect();
+        return model;
+    },
+
 ];
