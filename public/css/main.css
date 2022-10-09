@@ -1,0 +1,12 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+
+.wellcome-container {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}

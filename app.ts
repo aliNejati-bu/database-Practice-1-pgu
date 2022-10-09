@@ -11,7 +11,12 @@ app.set('view engine', 'ejs');
 // request logger
 app.use(routeLogger);
 
+// set public folder for public files
+app.use(express.static('public'))
 
+app.get("/", (req, res) => {
+    res.render('index');
+});
 
 
 /*
@@ -22,6 +27,6 @@ let port = config.port; // get port from config
 let server = config.server; // get sever addr from config
 
 
-app.listen(port,server,()=>{
-    console.log("Server started: http://"+server+":"+port); // start server
+app.listen(port, server, () => {
+    console.log("Server started: http://" + server + ":" + port); // start server
 });
