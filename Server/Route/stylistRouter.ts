@@ -144,4 +144,8 @@ router.post("/delete", async (req, res) => {
     }
 });
 
+router.get("/logout", (req, res) => {
+    res.clearCookie('stylistToken').redirect("/stylist/login");
+});
+
 export default router;

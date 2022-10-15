@@ -553,6 +553,13 @@ export class FileModel implements IFileModel {
                     ob.writeUint8(1);
                     fs.write(fd, ob, 0, 1, position + (this.recordSize - 1), (err) => {
                         if (err) return reject(err);
+                        let Models = dataManager.models;
+                        for (const modelsKey in Models) {
+                            if (modelsKey != this.name) {
+                                let model = (Models as any)[modelsKey] as FileModel;
+
+                            }
+                        }
                         return resolve(true);
                     });
 
