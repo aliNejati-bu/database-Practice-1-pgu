@@ -21,7 +21,31 @@ router.get("/", isStylistLogin, async (req, res, next) => {
 
         services = services.reverse();
 
-        res.render("spanel", {isError: false, user, history, services})
+        let et = "";
+        let e = false;
+        if (req.cookies.error) {
+            e = true;
+            et = req.cookies.error;
+            res.clearCookie("error");
+        }
+
+        let m = false;
+        let mt = "";
+        if (req.cookies.message) {
+            m = true;
+            mt = req.cookies.message;
+            res.clearCookie('message');
+        }
+
+        res.render("spanel", {
+            user,
+            history,
+            services,
+            isMessage: m,
+            isError: e,
+            message: mt,
+            error: et
+        })
     } catch (e) {
 
         console.log(e);
