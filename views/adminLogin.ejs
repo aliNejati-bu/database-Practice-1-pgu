@@ -7,6 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/bootstrap.min.css">
+    <link rel="stylesheet" href="/toastr.css">
     <title>welcome</title>
 </head>
 <body>
@@ -18,8 +19,8 @@
         <form method="post" class="col-12">
             <div class="form-group col-12">
                 <label for="exampleInputEmail1">Email address</label>
-                <input type="email" name="email" class="form-control col-12" id="exampleInputEmail1"
-                       aria-describedby="emailHelp" placeholder="Enter email">
+                <input type="text" name="name" class="form-control col-12" id="exampleInputEmail1"
+                       aria-describedby="emailHelp" placeholder="Enter useName">
             </div>
             <div class="form-group col-12">
                 <label for="exampleInputPassword1">Password</label>
@@ -30,6 +31,15 @@
         </form>
     </div>
 </div>
+
 <script src="/bootstrap.bundle.min.js"></script>
+<script src="/jquery.min.js"></script>
+<script src="/toastr.min.js"></script>
+<% if(isError){ %>
+    <script>
+        toastr["error"]("<%= error %>", "error")
+    </script>
+<%
+} %>
 </body>
 </html>

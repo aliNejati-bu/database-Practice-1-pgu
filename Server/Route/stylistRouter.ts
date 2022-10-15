@@ -64,7 +64,6 @@ router.post("/login", async (req, res, next) => {
         let user = await model.findOne([[
             {field: "name", op: "=", value: req.body.name}
         ]]);
-        console.log(user)
         if (!user) {
             return res.render("stylistLogin", {
                 isError: true,
