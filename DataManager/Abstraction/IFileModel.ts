@@ -33,4 +33,5 @@ export interface IFileModel {
 
     findOne(conditions: Array<Array<conditionType>>): Promise<any>;
 
+    deleteById(id: number): Promise<boolean>;
 }

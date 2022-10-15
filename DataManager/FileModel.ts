@@ -52,9 +52,7 @@ export class FileModel implements IFileModel {
             type: 'number',
             name: 'id'
         })
-        this.recordSize += 4;
-
-
+        this.recordSize += 5;
     }
 
 
@@ -62,7 +60,8 @@ export class FileModel implements IFileModel {
         return new Promise((resolve, reject) => {
             fs.exists(this.filePath, async (ex) => {
                 try {
-                    if (!ex) { // check for existing model file
+                    if (!ex) {
+                        // check for existing model file
                         // create file if not exists.
 
                         // create header buffer
@@ -222,6 +221,10 @@ export class FileModel implements IFileModel {
                     buffer = Buffer.concat([buffer, schemaBuffer]);
                 }
 
+                let isDeleteBuffer = Buffer.alloc(1);
+                isDeleteBuffer.writeUint8(0);
+                buffer = Buffer.concat([buffer, isDeleteBuffer]);
+
                 if (buffer.length != this.recordSize) {
                     throw new BaseDataException("conflict buffer size.");
                 }
@@ -309,12 +312,17 @@ export class FileModel implements IFileModel {
                 if (err) return reject(err);
 
                 if (stats.size < position + this.recordSize) {
-                    return reject(new BaseDataException("In model: " + this.name + " id: " + id + " no exist."));
+                    return resolve(false);
                 }
+
+
                 fs.open(this.filePath, "r+", (err, fd) => {
                     fs.read(fd, Buffer.alloc(this.recordSize), 0, this.recordSize, position, async (err, bytesRead, buffer) => {
                         if (err) return reject(err);
-
+                        let isdelete = buffer.readUInt8(this.recordSize - 1);
+                        if (isdelete === 1) {
+                            return resolve(false);
+                        }
                         let result;
                         try {
                             result = await this.prepareResult(buffer);
@@ -367,7 +375,10 @@ export class FileModel implements IFileModel {
                 let total = recordsSize / this.recordSize;
                 let result = [];
                 for (let i = 1; i <= total; i++) {
-                    result.push((await this.findById(i)));
+                    let res = (await this.findById(i));
+                    if (res !== false) {
+                        result.push(res);
+                    }
                 }
                 return resolve(result);
             });
@@ -524,6 +535,32 @@ export class FileModel implements IFileModel {
         return (await this.find(conditions, true))[0] ?? false;
     }
 
+    deleteById(id: number): Promise<boolean> {
+        return new Promise<boolean>((resolve, reject) => {
+
+            let position = this.headerSize + ((id - 1) * this.recordSize);
+
+            fs.stat(this.filePath, (err, stats) => {
+                if (err) return reject(err);
+
+                if (stats.size < position + this.recordSize) {
+                    return resolve(false);
+                }
+                fs.open(this.filePath, 'r+', (err, fd) => {
+                    if (err) return reject(err);
+
+                    let ob = Buffer.alloc(1);
+                    ob.writeUint8(1);
+                    fs.write(fd, ob, 0, 1, position + (this.recordSize - 1), (err) => {
+                        if (err) return reject(err);
+                        return resolve(true);
+                    });
+
+                });
+
+            });
+        });
+    }
 
 }
 
