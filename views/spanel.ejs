@@ -38,10 +38,11 @@
                     <th>Service</th>
                     <th>Date</th>
                     <th>Revenue</th>
+                    <th>Action</th>
                 </tr>
                 </thead>
                 <tbody>
-                <% history.forEach((val)=>{
+                <% history.forEach((val, index)=>{
                 %>
                     <tr>
                         <td><%= val.id %></td>
@@ -49,7 +50,38 @@
                         <td><%= val.service.name %></td>
                         <td><%= new Date(val.iat * 1000).toDateString() %></td>
                         <td><%= val.service.price %>$</td>
+                        <td>
+                            <button type="button" class="btn btn-danger" data-toggle="modal"
+                                    data-target="#delete<%= index %>">
+                                Delete
+                            </button>
+                        </td>
                     </tr>
+                    <div class="modal fade" id="delete<%= index %>" tabindex="-1" role="dialog"
+                         aria-labelledby="exampleModalLabel"
+                         aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">Create history</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <form method="post" action="/stylist/delete">
+                                    <div class="modal-body">
+                                        Are you sure about removing <%= val.user.name %>(<%= val.service.name %>)?
+                                        <input type="hidden" name="id" value="<%= val.id %>">
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close
+                                        </button>
+                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 <%
                 }) %>
                 </tbody>
@@ -60,6 +92,7 @@
                     <th>Service</th>
                     <th>Date</th>
                     <th>Revenue</th>
+                    <th>Action</th>
                 </tr>
                 </tfoot>
             </table>

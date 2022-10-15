@@ -125,4 +125,23 @@ router.post("/create", isStylistLogin, async (req, res) => {
     }
 });
 
+router.post("/delete", async (req, res) => {
+    try {
+        let servicesHistoryModel = await dataManager.getModelSingleton("serviceHistory");
+        let result = await servicesHistoryModel.deleteById(parseInt(req.body.id));
+
+        if (!result) {
+            res.cookie("error", "error");
+        } else {
+            res.cookie("message", "deleted!");
+        }
+        res.redirect("/stylist");
+
+    } catch (e) {
+        console.log(e);
+
+        res.send(e);
+    }
+});
+
 export default router;
