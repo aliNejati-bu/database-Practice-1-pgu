@@ -115,4 +115,21 @@ router.post("/users/create", isAdminLogin, async (req, res) => {
     }
 
 });
+
+router.post("/users/delete", isAdminLogin, async (req, res) => {
+    try {
+        let usersModel = await dataManager.getModelSingleton("users");
+        let result = usersModel.deleteById(req.body.id);
+        if (!result) {
+            res.cookie("error", "error");
+        } else {
+            res.cookie("message", "deleted!");
+        }
+
+        return res.redirect("/admin/users");
+    }catch (e) {
+        console.log(e);
+        res.send(e);
+    }
+});
 export default router;

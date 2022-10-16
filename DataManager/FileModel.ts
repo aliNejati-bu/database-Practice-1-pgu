@@ -397,7 +397,6 @@ export class FileModel implements IFileModel {
                     return
                 }
                 condGroup.forEach(condition => {
-
                     let fieldPath = condition.field.split(".");
                     let value;
                     if (fieldPath.length == 1) {
@@ -408,6 +407,9 @@ export class FileModel implements IFileModel {
                     } else {
                         let current = all[i];
                         for (let j = 0; j < fieldPath.length; j++) {
+                            if (current == false) {
+                                break
+                            }
                             if (!current.hasOwnProperty(fieldPath[j])) {
                                 throw new BaseDataException("field " + condition.field + " is not exist in " + this.name + " model.");
                             }
@@ -551,15 +553,8 @@ export class FileModel implements IFileModel {
 
                     let ob = Buffer.alloc(1);
                     ob.writeUint8(1);
-                    fs.write(fd, ob, 0, 1, position + (this.recordSize - 1), (err) => {
+                    fs.write(fd, ob, 0, 1, position + (this.recordSize - 1), async (err) => {
                         if (err) return reject(err);
-                        let Models = dataManager.models;
-                        for (const modelsKey in Models) {
-                            if (modelsKey != this.name) {
-                                let model = (Models as any)[modelsKey] as FileModel;
-
-                            }
-                        }
                         return resolve(true);
                     });
 
