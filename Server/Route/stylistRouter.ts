@@ -16,6 +16,11 @@ router.get("/", isStylistLogin, async (req, res, next) => {
         let history = await servicesHistoryModel.find([[{field: "stylist.id", op: "=", value: user.id}]]);
 
 
+        let total = 0;
+        history.forEach(value => {
+            total += value.service.price
+        });
+
         let servicesModel = await dataManager.getModelSingleton("services");
         let services = await servicesModel.all();
 
@@ -44,7 +49,8 @@ router.get("/", isStylistLogin, async (req, res, next) => {
             isMessage: m,
             isError: e,
             message: mt,
-            error: et
+            error: et,
+            total
         })
     } catch (e) {
 

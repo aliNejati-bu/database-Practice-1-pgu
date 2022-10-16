@@ -12,10 +12,20 @@ router.get("/", isAdminLogin, async (req, res, next) => {
 
         let user = await model.findById((req as any).token.id);
 
+        let servicesHistoryModel = await dataManager.getModelSingleton("serviceHistory");
+        let all = await servicesHistoryModel.all();
+        let total = 0;
+
+        all.forEach(value => {
+            total += value.service.price
+        });
+
 
         return res.render("adminPanel", {
             isError: false,
-            user
+            user,
+            total,
+            tc: all.length
         });
 
     } catch (e) {
