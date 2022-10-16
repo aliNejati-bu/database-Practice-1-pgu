@@ -12,10 +12,9 @@ router.get("/", isAdminLogin, async (req, res, next) => {
 
         let user = await model.findById((req as any).token.id);
 
-        console.log(user)
 
-        return res.render("adminPanel",{
-            isError:false,
+        return res.render("adminPanel", {
+            isError: false,
             user
         });
 
@@ -64,5 +63,16 @@ router.post("/login", async (req, res) => {
     }
 });
 
+
+router.get("/users", isAdminLogin, async (req, res) => {
+    let UsersModel = await dataManager.getModelSingleton("users");
+    let users = await UsersModel.all();
+
+    res.render("users", {
+        isError: false,
+        isMessage: false,
+        users
+    });
+});
 
 export default router;
