@@ -167,7 +167,7 @@ router.get("/users/history/:user", isAdminLogin, async (req, res) => {
             isError: e,
             message: mt,
             error: et,
-            userID:req.params.user
+            userID: req.params.user
         });
     } catch (e) {
         console.log(e);
@@ -194,4 +194,126 @@ router.post("/users/history/delete", async (req, res) => {
         res.send(e);
     }
 });
+
+
+router.get("/services", isAdminLogin, async (req, res) => {
+    try {
+        let et = "";
+        let e = false;
+        if (req.cookies.error) {
+            e = true;
+            et = req.cookies.error;
+            res.clearCookie("error");
+        }
+
+        let m = false;
+        let mt = "";
+        if (req.cookies.message) {
+            m = true;
+            mt = req.cookies.message;
+            res.clearCookie('message');
+        }
+
+        let servicesModel = await dataManager.getModelSingleton("services");
+        res.render('services', {
+            isMessage: m,
+            isError: e,
+            message: mt,
+            error: et,
+            services: await servicesModel.all()
+        });
+    } catch (e) {
+        console.log(e);
+
+        res.send(e);
+    }
+});
+
+
+router.post("/services/delete", async (req, res) => {
+    try {
+        let servicesModel = await dataManager.getModelSingleton("services");
+        let result = await servicesModel.deleteById(parseInt(req.body.id));
+
+        if (!result) {
+            res.cookie("error", "error");
+        } else {
+            res.cookie("message", "deleted!");
+        }
+
+        res.redirect("/admin/services");
+
+    } catch (e) {
+        console.log(e);
+
+        res.send(e);
+    }
+});
+
+
+router.post("/services/create", async (req, res) => {
+    try {
+        let servicesModel = await dataManager.getModelSingleton("services");
+
+        let result = await servicesModel.insertOne({
+            name: req.body.name,
+            price: parseInt(req.body.price)
+        });
+
+        if (!result) {
+            res.cookie("error", "error");
+        } else {
+            res.cookie("message", "created!");
+        }
+
+        res.redirect("/admin/services");
+
+    } catch (e) {
+        res.cookie("error", "name most unique.");
+        return res.redirect("/admin/services");
+    }
+});
+
+router.get("/services/:id", isAdminLogin, async (req, res) => {
+    try {
+        let servicesHistoryModel = await dataManager.getModelSingleton("serviceHistory");
+        let history = await servicesHistoryModel.find([[
+            {
+                field: "service.id",
+                op: "=",
+                value: parseInt(req.params.id)
+            }
+        ]]);
+
+        let et = "";
+        let e = false;
+        if (req.cookies.error) {
+            e = true;
+            et = req.cookies.error;
+            res.clearCookie("error");
+        }
+
+        let m = false;
+        let mt = "";
+        if (req.cookies.message) {
+            m = true;
+            mt = req.cookies.message;
+            res.clearCookie('message');
+        }
+
+
+        res.render('serviceHistory', {
+            history,
+            isMessage: m,
+            isError: e,
+            message: mt,
+            error: et,
+            id: req.params.id
+        });
+    } catch (e) {
+        console.log(e);
+        res.send(e);
+    }
+});
+
 export default router;
