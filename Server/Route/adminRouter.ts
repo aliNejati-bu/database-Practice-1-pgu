@@ -6,8 +6,23 @@ import * as config from "../../Config/config.json";
 
 let router = express.Router();
 
-router.get("/", isAdminLogin, (req, res, next) => {
-    res.send("ok");
+router.get("/", isAdminLogin, async (req, res, next) => {
+    try {
+        let model = await dataManager.getModelSingleton("admins");
+
+        let user = await model.findById((req as any).token.id);
+
+        console.log(user)
+
+        return res.render("adminPanel",{
+            isError:false,
+            user
+        });
+
+    } catch (e) {
+        console.log(e);
+        res.send(e);
+    }
 });
 
 router.get("/login", async (req, res, next) => {
@@ -15,7 +30,7 @@ router.get("/login", async (req, res, next) => {
 });
 
 router.post("/login", async (req, res) => {
-    try{
+    try {
         let model = await dataManager.getModelSingleton("admins");
         let userName = req.body.name;
         let password = req.body.password;
@@ -43,7 +58,7 @@ router.post("/login", async (req, res) => {
             res.cookie("adminToken", token, {expire: 360000 * Date.now()} as any);
             res.redirect("/admin");
         }
-    }catch (e){
+    } catch (e) {
         console.log(e);
         res.send(e);
     }

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/bootstrap.min.css">
+    <link rel="stylesheet" href="/toastr.css">
+    <title>welcome</title>
+</head>
+<body>
+<div class="container wellcome-container">
+    <div class="row">
+        <h2 class="col-12 text-center mb-5">
+            Welcome(<%= user.email %>):
+        </h2>
+        <a href="/admin/users" class="btn btn-primary btn mb-2 btn-block btn-lg">Users list</a>
+        <a href="/admin/services" class="btn btn-success mb-2  btn-block btn-lg">Services list</a>
+        <a href="/admin/stylists" class="btn btn-primary btn-block btn-lg">Stylists list</a>
+    </div>
+</div>
+
+<script src="/bootstrap.bundle.min.js"></script>
+<script src="/jquery.min.js"></script>
+<script src="/toastr.min.js"></script>
+<% if(isError){ %>
+    <script>
+        toastr["error"]("<%= error %>", "error")
+    </script>
+<%
+} %>
+</body>
+</html>
