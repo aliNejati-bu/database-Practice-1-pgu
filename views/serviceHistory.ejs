@@ -57,7 +57,7 @@
                                         <span aria-hidden="true">&times;</span>
                                     </button>
                                 </div>
-                                <form method="post" action="/admin/users/history/delete">
+                                <form method="post" action="/admin/services/history/delete">
                                     <div class="modal-body">
                                         Are you sure about removing <%= val.user.name %>(<%= val.service.name %>)?
                                         <input type="hidden" name="id" value="<%= val.id %>">
@@ -87,7 +87,7 @@
                 </tr>
                 </tfoot>
             </table>
-            <a href="/admin/users" class="btn btn-warning btn-block">
+            <a href="/admin/services" class="btn btn-warning btn-block">
                 back
             </a>
         </div>

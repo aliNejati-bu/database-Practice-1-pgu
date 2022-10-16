@@ -316,4 +316,22 @@ router.get("/services/:id", isAdminLogin, async (req, res) => {
     }
 });
 
+
+router.post("/services/history/delete", isAdminLogin, async (req, res) => {
+    try {
+        let servicesHistoryModel = await dataManager.getModelSingleton("serviceHistory");
+        let result = await servicesHistoryModel.deleteById(parseInt(req.body.id));
+
+        if (!result) {
+            res.cookie("error", "error");
+        } else {
+            res.cookie("message", "deleted!");
+        }
+        res.redirect("/admin/users/history/" + req.body.userID);
+    } catch (e) {
+        console.log(e);
+
+        res.send(e);
+    }
+});
 export default router;

@@ -50,6 +50,34 @@ dataManager.connect().then(() => {
         console.log("Server started: http://" + server + ":" + port); // start server
     });
 
+    async function init() {
+        let userModel = await dataManager.getModelSingleton("users");
+        let stylistModel = await dataManager.getModelSingleton("stylists");
+        let servicesModel = await dataManager.getModelSingleton("services");
+        let serviceHistoryModel = await dataManager.getModelSingleton("serviceHistory");
+        let adminModel = await dataManager.getModelSingleton("admins");
+
+        await adminModel.insertOne({
+            email: "admin",
+            password: "admin"
+        });
+
+        await stylistModel.insertOne({
+            name: "reza",
+            age: 22,
+            class: 4,
+            password: "101020203030"
+        });
+
+        await stylistModel.insertOne({
+            name: "ali",
+            age: 31,
+            class: 5,
+            password: "101020203030"
+        });
+    }
+
+
 }).catch(e => console.log(e))
 
 
