@@ -68,11 +68,51 @@ router.get("/users", isAdminLogin, async (req, res) => {
     let UsersModel = await dataManager.getModelSingleton("users");
     let users = await UsersModel.all();
 
+    let et = "";
+    let e = false;
+    if (req.cookies.error) {
+        e = true;
+        et = req.cookies.error;
+        res.clearCookie("error");
+    }
+
+    let m = false;
+    let mt = "";
+    if (req.cookies.message) {
+        m = true;
+        mt = req.cookies.message;
+        res.clearCookie('message');
+    }
+
     res.render("users", {
-        isError: false,
-        isMessage: false,
-        users
+        users,
+        isMessage: m,
+        isError: e,
+        message: mt,
+        error: et
     });
 });
 
+
+router.post("/users/create", isAdminLogin, async (req, res) => {
+    let UsersModel = await dataManager.getModelSingleton("users");
+    try {
+        let result = await UsersModel.insertOne({
+            name: req.body.username,
+            password: req.body.password,
+            iat: parseInt((Date.now() / 1000) as any)
+        });
+        if (!result) {
+            res.cookie("error", "error");
+        } else {
+            res.cookie("message", "created");
+        }
+
+        return res.redirect("/admin/users");
+    } catch (e) {
+        res.cookie("error", "user most unique.");
+        return res.redirect("/admin/users");
+    }
+
+});
 export default router;
