@@ -10,41 +10,35 @@
     <link rel="stylesheet" type="text/css" href="/jquery.dataTables.css">
     <link rel="stylesheet" href="/toastr.css">
 
-    <title>users List</title>
+    <title>user history</title>
 </head>
 <body>
 <div class="container wellcome-container">
     <div class="row">
-        <h2 class="col-12 text-center mb-5">
-            Users List:
+        <h2 class="col-12 text-center mb-5 mt-5">
+            user history:
         </h2>
         <div class="row col-12 d-flex align-content-center justify-content-center">
             <table id="example" class="display col-12" style="width:100%">
                 <thead>
                 <tr>
                     <th>Id</th>
-                    <th>Name</th>
-                    <th>Created At</th>
-                    <th>Password</th>
-                    <th>Actions</th>
+                    <th>User</th>
+                    <th>Service</th>
+                    <th>Date</th>
+                    <th>Revenue</th>
+                    <th>Action</th>
                 </tr>
                 </thead>
                 <tbody>
-                <% users.forEach((val, index)=>{
+                <% history.forEach((val, index)=>{
                 %>
                     <tr>
-                        <td>
-                            <a href="/admin/users/history/<%= val.id %>">
-                                <%= val.id %>
-                            </a>
-                        </td>
-                        <td>
-                            <a href="/admin/users/history/<%= val.id %>">
-                                <%= val.name %>
-                            </a>
-                        </td>
+                        <td><%= val.id %></td>
+                        <td><%= val.user.name %></td>
+                        <td><%= val.service.name %></td>
                         <td><%= new Date(val.iat * 1000).toDateString() %></td>
-                        <td><%= val.password %></td>
+                        <td><%= val.service.price %>$</td>
                         <td>
                             <button type="button" class="btn btn-danger" data-toggle="modal"
                                     data-target="#delete<%= index %>">
@@ -58,15 +52,17 @@
                         <div class="modal-dialog" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h5 class="modal-title" id="exampleModalLabel">Create history</h5>
+                                    <h5 class="modal-title" id="exampleModalLabel">Delete history</h5>
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
                                 </div>
-                                <form method="post" action="/admin/users/delete">
+                                <form method="post" action="/admin/users/history/delete">
                                     <div class="modal-body">
-                                        Are you sure about removing <%= val.name %>?
+                                        Are you sure about removing <%= val.user.name %>(<%= val.service.name %>)?
                                         <input type="hidden" name="id" value="<%= val.id %>">
+
+                                        <input type="hidden" name="userID" value="<%= userID %>">
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close
@@ -83,18 +79,15 @@
                 <tfoot>
                 <tr>
                     <th>Id</th>
-                    <th>Name</th>
-                    <th>Created At</th>
-                    <th>Password</th>
-                    <th>Actions</th>
+                    <th>User</th>
+                    <th>Service</th>
+                    <th>Date</th>
+                    <th>Revenue</th>
+                    <th>Action</th>
                 </tr>
                 </tfoot>
             </table>
-            <button type="button" class="btn btn-primary btn-block mt-4" data-toggle="modal"
-                    data-target="#exampleModal">
-                createUser
-            </button>
-            <a href="/admin" class="btn btn-warning btn-block">
+            <a href="/admin/users" class="btn btn-warning btn-block">
                 back
             </a>
         </div>
@@ -129,40 +122,6 @@
     </script>
 <%
 } %>
-
-<!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Create history</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <form method="post" action="/admin/users/create">
-                <div class="modal-body">
-                    <div class="form-group col-12">
-                        <label for="exampleInputEmail1">User name</label>
-                        <input type="text" name="username" class="form-control col-12" id="exampleInputEmail1"
-                               aria-describedby="emailHelp" placeholder="User name" required>
-                    </div>
-                    <div class="form-group col-12">
-                        <label for="exampleInputEmail1">User Password</label>
-                        <input type="text" name="password" class="form-control col-12" id="exampleInputEmail1"
-                               aria-describedby="emailHelp" placeholder="User password" required>
-                    </div>
-
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Save changes</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 
 </body>
 </html>

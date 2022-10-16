@@ -127,8 +127,70 @@ router.post("/users/delete", isAdminLogin, async (req, res) => {
         }
 
         return res.redirect("/admin/users");
-    }catch (e) {
+    } catch (e) {
         console.log(e);
+        res.send(e);
+    }
+});
+
+router.get("/users/history/:user", isAdminLogin, async (req, res) => {
+    try {
+        let servicesHistoryModel = await dataManager.getModelSingleton("serviceHistory");
+        let history = await servicesHistoryModel.find([[
+            {
+                field: "user.id",
+                op: "=",
+                value: parseInt(req.params.user)
+            }
+        ]]);
+
+        let et = "";
+        let e = false;
+        if (req.cookies.error) {
+            e = true;
+            et = req.cookies.error;
+            res.clearCookie("error");
+        }
+
+        let m = false;
+        let mt = "";
+        if (req.cookies.message) {
+            m = true;
+            mt = req.cookies.message;
+            res.clearCookie('message');
+        }
+
+
+        res.render('userHistory', {
+            history,
+            isMessage: m,
+            isError: e,
+            message: mt,
+            error: et,
+            userID:req.params.user
+        });
+    } catch (e) {
+        console.log(e);
+        res.send(e);
+    }
+
+});
+
+router.post("/users/history/delete", async (req, res) => {
+    try {
+        let servicesHistoryModel = await dataManager.getModelSingleton("serviceHistory");
+        let result = await servicesHistoryModel.deleteById(parseInt(req.body.id));
+
+        if (!result) {
+            res.cookie("error", "error");
+        } else {
+            res.cookie("message", "deleted!");
+        }
+        res.redirect("/admin/users/history/" + req.body.userID);
+
+    } catch (e) {
+        console.log(e);
+
         res.send(e);
     }
 });

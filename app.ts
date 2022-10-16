@@ -16,7 +16,7 @@ dataManager.connect().then(() => {
     app.set('view engine', 'ejs');
 
 // request logger
-    //  app.use(routeLogger);
+    app.use(routeLogger);
 
 // set public folder for public files
     app.use(express.static('public'))
